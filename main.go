@@ -18,8 +18,14 @@ import (
 )
 
 var (
-	app   = tview.NewApplication()
-	text  = tview.NewTextView()
+	app  = tview.NewApplication()
+	text = tview.NewTextView().
+		SetTextColor(tcell.ColorWhite).
+		ScrollToEnd().
+		SetScrollable(true).
+		SetChangedFunc(func() {
+			app.Draw()
+		})
 	pages = tview.NewPages()
 	flex  = tview.NewFlex()
 	form  = tview.NewForm()
@@ -113,28 +119,25 @@ func pullImages(s []string) {
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		errorPage(err)
+		panic(err)
 	}
-
-	text.SetTextColor(tcell.ColorWhite).
-		ScrollToEnd().
-		SetScrollable(true).
-		SetChangedFunc(func() {
-			app.Draw()
-		})
-	text.SetText("Pulling Images")
 	for _, v := range s {
-		out, err := cli.ImagePull(ctx, v, types.ImagePullOptions{})
+		streamPullToWriter(v, cli)
+	}
+}
+
+func streamPullToWriter(s string, c *client.Client) {
+	go func() {
+		out, err := c.ImagePull(ctx, s, types.ImagePullOptions{})
 		if err != nil {
 			panic(err)
 		}
-		output := streamToByte(out)
-		text.Write(output)
 		defer out.Close()
-	}
-
+		io.Copy(text, out)
+	}()
 }
 
+// Stream to byte example
 func streamToByte(stream io.Reader) []byte {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(stream)
@@ -160,12 +163,6 @@ func (i *Images) dockerPush(s []string) {
 		s := listImages()
 		updateText(s, nil)
 	})
-	/*
-		.AddButton("Pull Images", func() {
-			f, _ := readFile(i.fileName)
-			pullImages(f)
-		})
-	*/
 }
 
 func (i *Images) dockerTag(s []string) {
@@ -216,36 +213,3 @@ func readFile(f string) ([]string, error) {
 	}
 	return images, err
 }
-
-//scanner := bufio.NewScanner(out)
-//text.Write(scanner.Bytes())
-
-//buf := new(bytes.Buffer)
-//buf.ReadFrom(out)
-//text.Write(buf.Bytes())
-
-//var b bytes.Buffer
-
-//return buf.Bytes()
-//body, err := io.ReadAll(out)
-//if err != nil {
-//	errorPage(err)
-//}
-//text.SetText("Pulling Images")
-
-//text.Write(scanner.Bytes())
-
-//var b []byte
-//buf := new(bytes.Buffer)
-//buf.ReadFrom(out)
-//r, _ := buf.ReadBytes()
-//b = append(b, r)
-//text.Write(r)
-//text.Write(buf.Bytes())
-
-//io.Copy(os.Stdout, out)
-
-//body, _ := io.ReadAll(out)
-//hello = append(hello, body...)
-
-//text.Write(body)
