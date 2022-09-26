@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -34,8 +35,12 @@ var (
 )
 
 type Images struct {
-	fileName string
-	registry string
+	fileName      string
+	registry      string
+	tagged        []string
+	username      string
+	password      string
+	serveraddress string
 }
 
 func main() {
@@ -95,6 +100,8 @@ func (i *Images) mainMenu() {
 		})
 }
 
+// s []string is source image.
+// t string is the target which is pulled from registry input field.
 func tagImages(s []string, t string) ([]string, error) {
 
 	var target []string
@@ -107,6 +114,40 @@ func tagImages(s []string, t string) ([]string, error) {
 		}
 	}
 	return target, err
+}
+
+// s []string is list of images to push
+func (i *Images) pushImages() {
+
+	for _, v := range i.tagged {
+		i.streamPushToWriter(v)
+	}
+}
+
+// takes the image as a string and streams to io.Writer
+// Requires username and password to auth
+func (i *Images) streamPushToWriter(image string) {
+
+	var authConfig = types.AuthConfig{
+		Username:      i.username,
+		Password:      i.password,
+		ServerAddress: i.serveraddress,
+	}
+	encodedJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		panic(err)
+	}
+	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
+
+	go func() {
+		r, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: authStr})
+		if err != nil {
+			updateText(nil, err)
+			panic(err)
+		}
+		defer r.Close()
+		io.Copy(text, r)
+	}()
 }
 
 func listImages() []string {
@@ -159,30 +200,17 @@ func (i *Images) dockerPush(s []string) {
 		pages.SwitchToPage("Menu")
 		app.SetFocus(menu)
 	}).AddButton("Push to Registry", func() {
-		i.dockerTag(s)
-		for _, v := range s {
-			cmdStr := "docker push " + v
-			out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
-			text.Write(out)
-		}
+		text.Clear()
+		i.pushImages()
 	}).AddButton("List Images", func() {
 		s := listImages()
 		updateText(s, nil)
 	}).AddButton("Tag Images", func() {
+		text.Clear()
 		f, _ := readFile(i.fileName)
-		s, err := tagImages(f, i.registry)
-		updateText(s, err)
+		i.tagged, err = tagImages(f, i.registry)
+		updateText(i.tagged, err)
 	})
-}
-
-func (i *Images) dockerTag(s []string) {
-
-	registry := i.registry
-	for _, v := range s {
-		cmdStr := "docker tag " + v + registry + "/" + v
-		out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
-		text.Write(out)
-	}
 }
 
 func errorPage(e error) {
@@ -230,5 +258,17 @@ func streamToByte(stream io.Reader) []byte {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(stream)
 	return buf.Bytes()
+}
+*/
+
+/*
+func (i *Images) dockerTag(s []string) {
+
+	registry := i.registry
+	for _, v := range s {
+		cmdStr := "docker tag " + v + registry + "/" + v
+		out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
+		text.Write(out)
+	}
 }
 */
