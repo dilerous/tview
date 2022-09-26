@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"io"
 	"log"
@@ -26,11 +25,12 @@ var (
 		SetChangedFunc(func() {
 			app.Draw()
 		})
-	pages = tview.NewPages()
-	flex  = tview.NewFlex()
-	form  = tview.NewForm()
-	menu  = tview.NewForm()
-	ctx   = context.Background()
+	pages    = tview.NewPages()
+	flex     = tview.NewFlex()
+	form     = tview.NewForm()
+	menu     = tview.NewForm()
+	ctx      = context.Background()
+	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 )
 
 type Images struct {
@@ -95,9 +95,22 @@ func (i *Images) mainMenu() {
 		})
 }
 
+func tagImages(s []string, t string) ([]string, error) {
+
+	var target []string
+
+	for _, v := range s {
+		err := cli.ImageTag(ctx, v, t+"/"+v)
+		target = append(target, t+"/"+v)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return target, err
+}
+
 func listImages() []string {
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
 	}
@@ -117,7 +130,6 @@ func listImages() []string {
 
 func pullImages(s []string) {
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
 	}
@@ -137,17 +149,15 @@ func streamPullToWriter(s string, c *client.Client) {
 	}()
 }
 
-// Stream to byte example
-func streamToByte(stream io.Reader) []byte {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return buf.Bytes()
-}
-
 func (i *Images) dockerPush(s []string) {
 
-	form.AddInputField("Registry: ", "", 20, nil, func(reg string) {
+	form.AddInputField("Registry: ", "", 40, nil, func(reg string) {
 		i.registry = reg
+
+	}).AddButton("Return to Menu", func() {
+		form.Clear(true)
+		pages.SwitchToPage("Menu")
+		app.SetFocus(menu)
 	}).AddButton("Push to Registry", func() {
 		i.dockerTag(s)
 		for _, v := range s {
@@ -155,13 +165,13 @@ func (i *Images) dockerPush(s []string) {
 			out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
 			text.Write(out)
 		}
-	}).AddButton("Return to Menu", func() {
-		form.Clear(true)
-		pages.SwitchToPage("Menu")
-		app.SetFocus(menu)
 	}).AddButton("List Images", func() {
 		s := listImages()
 		updateText(s, nil)
+	}).AddButton("Tag Images", func() {
+		f, _ := readFile(i.fileName)
+		s, err := tagImages(f, i.registry)
+		updateText(s, err)
 	})
 }
 
@@ -213,3 +223,12 @@ func readFile(f string) ([]string, error) {
 	}
 	return images, err
 }
+
+// Stream to byte example
+/*
+func streamToByte(stream io.Reader) []byte {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.Bytes()
+}
+*/
