@@ -35,12 +35,12 @@ var (
 )
 
 type Images struct {
-	fileName      string
-	registry      string
-	tagged        []string
-	username      string
-	password      string
-	serveraddress string
+	fileName string
+	registry string
+	tagged   []string
+	username string
+	password string
+	server   string
 }
 
 func main() {
@@ -131,7 +131,7 @@ func (i *Images) streamPushToWriter(image string) {
 	var authConfig = types.AuthConfig{
 		Username:      i.username,
 		Password:      i.password,
-		ServerAddress: i.serveraddress,
+		ServerAddress: i.registry,
 	}
 	encodedJSON, err := json.Marshal(authConfig)
 	if err != nil {
@@ -150,9 +150,11 @@ func (i *Images) streamPushToWriter(image string) {
 	}()
 }
 
+// Returns all images by Repo Tag as a []string slice
 func listImages() []string {
 
 	if err != nil {
+		updateText(nil, err)
 		panic(err)
 	}
 
@@ -164,11 +166,12 @@ func listImages() []string {
 	var imageId []string
 
 	for _, image := range images {
-		imageId = append(imageId, image.ID)
+		imageId = append(imageId, image.RepoTags...)
 	}
 	return imageId
 }
 
+// s []string is a slice of images
 func pullImages(s []string) {
 
 	if err != nil {
@@ -179,6 +182,7 @@ func pullImages(s []string) {
 	}
 }
 
+// takes images as a string and streams the update to text
 func streamPullToWriter(s string, c *client.Client) {
 	go func() {
 		out, err := c.ImagePull(ctx, s, types.ImagePullOptions{})
@@ -192,9 +196,18 @@ func streamPullToWriter(s string, c *client.Client) {
 
 func (i *Images) dockerPush(s []string) {
 
-	form.AddInputField("Registry: ", "", 40, nil, func(reg string) {
-		i.registry = reg
-
+	form.AddInputField("Docker Username: ", "", 40, nil, func(user string) {
+		i.username = user
+	}).AddPasswordField("Docker Password: ", "", 40, 42, func(password string) {
+		i.password = password
+	}).AddInputField("Server Address: ", "https://index.docker.io/v1/", 40, nil, func(server string) {
+		if server != "" {
+			i.server = server
+		} else {
+			i.server = "https://index.docker.io/v1/"
+		}
+	}).AddInputField("Registry: ", "", 40, nil, func(registry string) {
+		i.registry = registry
 	}).AddButton("Return to Menu", func() {
 		form.Clear(true)
 		pages.SwitchToPage("Menu")
@@ -203,6 +216,7 @@ func (i *Images) dockerPush(s []string) {
 		text.Clear()
 		i.pushImages()
 	}).AddButton("List Images", func() {
+		text.Clear()
 		s := listImages()
 		updateText(s, nil)
 	}).AddButton("Tag Images", func() {
@@ -211,12 +225,6 @@ func (i *Images) dockerPush(s []string) {
 		i.tagged, err = tagImages(f, i.registry)
 		updateText(i.tagged, err)
 	})
-}
-
-func errorPage(e error) {
-
-	text.SetTextColor(tcell.ColorRed).
-		SetText(e.Error())
 }
 
 func updateText(s []string, e error) {
@@ -235,7 +243,7 @@ func readFile(f string) ([]string, error) {
 
 	file, err := os.Open(f)
 	if err != nil {
-		errorPage(err)
+		updateText(nil, err)
 		return nil, err
 	}
 	defer file.Close()
