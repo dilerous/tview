@@ -1,0 +1,59 @@
+2022/09/27 16:44:40 
+2022/09/27 16:44:40 bsoper
+2022/09/27 16:51:26 docker.io
+2022/09/27 16:51:26 bsoper
+2022/09/28 07:56:51 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 07:56:51 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:05:37 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:05:37 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:06:14 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:06:14 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:11:24 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:11:24 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:18:40 No slice was passed to the function: []
+2022/09/28 08:19:18 No slice was passed to the function: []
+2022/09/28 08:20:37 No slice was passed to the function: []
+2022/09/28 08:25:15 No slice was passed to the function: []
+2022/09/28 08:26:06 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:31:31 No slice was passed to the function: []
+2022/09/28 08:31:39 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:46:20 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:47:13 No slice was passed to the function: []
+2022/09/28 08:47:22 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:47:22 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:47:22 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:55:21 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:55:21 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:55:59 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:55:59 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:55:59 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:48 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:48 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:48 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:52 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:52 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:56:52 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:57:05 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:57:05 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 08:57:05 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:01:53 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:01:53 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:01:53 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:03:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:04:16 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:04:16 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:04:16 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:06:29 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:06:29 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:06:29 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:07:12 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:07:12 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:07:12 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:08:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:08:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+2022/09/28 09:08:30 Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
