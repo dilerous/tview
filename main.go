@@ -93,44 +93,64 @@ func main() {
 
 	if err := app.SetRoot(flex, true).EnableMouse(true).Run(); err != nil {
 		log.Println(err)
-		updateText(nil, err)
 		panic(err)
 	}
 }
 
 func (i *Images) mainMenu() {
 
-	menu.AddInputField("Images File: ", "", 34, nil, func(fileName string) {
+	i.username = "cnvrghelm"
+
+	menu.SetBorder(true).
+		SetTitle(" cnvrg.io Deployment Tool ").
+		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(tcell.ColorGreen)
+
+	text.SetText("Please enter the Docker Hub credientials provided by cnvrg.io to download the images needed.").
+		SetWordWrap(true)
+
+	menu.AddInputField("cnvrg.io Docker Username: ", "cnvrghelm", 40, nil, func(user string) {
+		i.username = user
+	}).AddPasswordField("cnvrg.io Docker Password: ", "", 40, 42, func(password string) {
+		i.password = password
+	}).AddInputField("Images File: ", "", 40, nil, func(fileName string) {
 		i.fileName = fileName
-	}).
-		AddButton("Quit", func() {
-			app.Stop()
-		}).
-		AddButton("View File", func() {
-			f, err := readFile(i.fileName)
-			updateText(f, err)
-		}).
-		AddButton("Pull Images", func() {
-			f, _ := readFile(i.fileName)
-			text.Clear()
-			pullImages(f)
-		}).
-		AddButton("Push Images", func() {
-			f, _ := readFile(i.fileName)
-			i.dockerPush(f)
-			pages.SwitchToPage("Push")
-		})
+	}).AddButton("Quit", func() {
+		app.Stop()
+	}).AddButton("View File", func() {
+		f, err := readFile(i.fileName)
+		updateText(f, err)
+	}).AddButton("Pull Images", func() {
+		f, _ := readFile(i.fileName)
+		text.Clear()
+		i.pullImages(f)
+	}).AddButton("Push Images", func() {
+		f, _ := readFile(i.fileName)
+		i.dockerPush(f)
+		pages.SwitchToPage("Push")
+	})
+
 }
 
 // s []string is source image.
 // t string is the target which is pulled from registry input field.
 func (i *Images) tagImages(s []string) ([]string, error) {
-	log.Println(i.server)
-	log.Println(i.registry)
+
+	text.SetText("Tagged Images: ")
 
 	var target []string
 
 	for _, v := range s {
+
+		defer func() {
+			if err := recover(); err != nil {
+				text.SetText(fmt.Sprint(err)).
+					SetTextColor(tcell.ColorRed)
+				log.Println(err)
+
+			}
+		}()
+
 		err := cli.ImageTag(ctx, v, i.server+"/"+i.registry+"/"+v)
 		target = append(target, i.server+"/"+i.registry+"/"+v)
 		if err != nil {
@@ -175,12 +195,15 @@ func (i *Images) streamPushToWriter(image string) {
 }
 
 // Returns all images by Repo Tag as a []string slice
-func listImages() []string {
+func listImages() {
 
-	if err != nil {
-		updateText(nil, err)
-		panic(err)
-	}
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			text.SetText(fmt.Sprint(err)).
+				SetTextColor(tcell.ColorRed)
+		}
+	}()
 
 	images, err := cli.ImageList(ctx, types.ImageListOptions{})
 	if err != nil {
@@ -192,32 +215,38 @@ func listImages() []string {
 	for _, image := range images {
 		imageId = append(imageId, image.RepoTags...)
 	}
-	return imageId
+	sString := strings.Join(imageId, "\n")
+	text.SetTextColor(tcell.ColorWhite).
+		SetText(sString)
 }
 
 // s []string is a slice of images
-func pullImages(s []string) {
-
-	defer func() {
-		if r := recover(); r != nil {
-			text.SetText("Susan recovered from the panic")
-			text.SetText("silly susan handles the panic gracefully")
-		}
-	}()
+func (i *Images) pullImages(s []string) {
 
 	if fmt.Sprint(s) == "[]" {
 		log.Printf("No data was passed to the slice: %v\n", s)
-		text.SetText("Please input an Images File and try again").
+		text.SetText("Please input a valid Images File and try again").
 			SetTextColor(tcell.ColorRed)
 	}
 
 	for _, v := range s {
-		streamPullToWriter(v, cli)
+		i.streamPullToWriter(v, cli)
 	}
 }
 
 // takes images as a string and streams the update to text
-func streamPullToWriter(s string, c *client.Client) {
+func (i *Images) streamPullToWriter(s string, c *client.Client) {
+
+	var authConfig = types.AuthConfig{
+		Username:      i.username,
+		Password:      i.password,
+		ServerAddress: i.server,
+	}
+	encodedJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		panic(err)
+	}
+	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 
 	go func() {
 
@@ -229,7 +258,7 @@ func streamPullToWriter(s string, c *client.Client) {
 			}
 		}()
 
-		out, err := c.ImagePull(ctx, s, types.ImagePullOptions{})
+		out, err := c.ImagePull(ctx, s, types.ImagePullOptions{RegistryAuth: authStr})
 		if err != nil {
 			panic(err)
 		}
@@ -258,8 +287,7 @@ func (i *Images) dockerPush(s []string) {
 		i.pushImages()
 	}).AddButton("List Images", func() {
 		text.Clear()
-		s := listImages()
-		updateText(s, nil)
+		listImages()
 	}).AddButton("Tag Images", func() {
 		text.Clear()
 		f, _ := readFile(i.fileName)
