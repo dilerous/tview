@@ -134,30 +134,29 @@ func (i *Images) mainMenu() {
 
 // s []string is source image.
 // t string is the target which is pulled from registry input field.
-func (i *Images) tagImages(s []string) ([]string, error) {
+func (i *Images) tagImages(s []string) {
 
-	text.SetText("Tagged Images: ")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			handlePanic(err)
+		}
+	}()
 
 	var target []string
+	i.server = "docker.io"
 
 	for _, v := range s {
-
-		defer func() {
-			if err := recover(); err != nil {
-				text.SetText(fmt.Sprint(err)).
-					SetTextColor(tcell.ColorRed)
-				log.Println(err)
-
-			}
-		}()
-
 		err := cli.ImageTag(ctx, v, i.server+"/"+i.registry+"/"+v)
 		target = append(target, i.server+"/"+i.registry+"/"+v)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return target, err
+
+	sString := strings.Join(target, "\n")
+	text.SetTextColor(tcell.ColorWhite).
+		SetText(sString)
 }
 
 // s []string is list of images to push
@@ -200,8 +199,7 @@ func listImages() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			text.SetText(fmt.Sprint(err)).
-				SetTextColor(tcell.ColorRed)
+			handlePanic(err)
 		}
 	}()
 
@@ -253,8 +251,9 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Println(err)
-				text.SetText(fmt.Sprint(err)).
-					SetTextColor(tcell.ColorRed)
+				handlePanic(err)
+				//text.SetText(fmt.Sprint(err)).
+				//	SetTextColor(tcell.ColorRed)
 			}
 		}()
 
@@ -291,9 +290,13 @@ func (i *Images) dockerPush(s []string) {
 	}).AddButton("Tag Images", func() {
 		text.Clear()
 		f, _ := readFile(i.fileName)
-		i.tagged, err = i.tagImages(f)
-		updateText(i.tagged, err)
+		i.tagImages(f)
 	})
+}
+
+func handlePanic(err interface{}) {
+	text.SetTextColor(tcell.ColorRed).
+		SetText(fmt.Sprint(err))
 }
 
 func updateText(s []string, e error) {
