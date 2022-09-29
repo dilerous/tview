@@ -149,6 +149,7 @@ func (i *Images) tagImages(s []string) {
 	for _, v := range s {
 		err := cli.ImageTag(ctx, v, i.server+"/"+i.registry+"/"+v)
 		target = append(target, i.server+"/"+i.registry+"/"+v)
+		i.tagged = target
 		if err != nil {
 			panic(err)
 		}
@@ -161,6 +162,12 @@ func (i *Images) tagImages(s []string) {
 
 // s []string is list of images to push
 func (i *Images) pushImages() {
+
+	if i.tagged == nil {
+		log.Printf("There are no tagged images: %v", i.tagged)
+		text.SetText("There are no tagged images").
+			SetTextColor(tcell.ColorRed)
+	}
 
 	for _, v := range i.tagged {
 		i.streamPushToWriter(v)
@@ -183,6 +190,14 @@ func (i *Images) streamPushToWriter(image string) {
 	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 
 	go func() {
+
+		defer func() {
+			if err := recover(); err != nil {
+				log.Println(err)
+				handlePanic(err)
+			}
+		}()
+
 		r, err := cli.ImagePush(ctx, image, types.ImagePushOptions{RegistryAuth: authStr})
 		if err != nil {
 			updateText(nil, err)
@@ -252,8 +267,6 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 			if err := recover(); err != nil {
 				log.Println(err)
 				handlePanic(err)
-				//text.SetText(fmt.Sprint(err)).
-				//	SetTextColor(tcell.ColorRed)
 			}
 		}()
 
@@ -295,6 +308,7 @@ func (i *Images) dockerPush(s []string) {
 }
 
 func handlePanic(err interface{}) {
+	InfoLogger.Println("In the handlePanic function")
 	text.SetTextColor(tcell.ColorRed).
 		SetText(fmt.Sprint(err))
 }
@@ -331,24 +345,3 @@ func readFile(f string) ([]string, error) {
 	}
 	return images, err
 }
-
-// Stream to byte example
-/*
-func streamToByte(stream io.Reader) []byte {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return buf.Bytes()
-}
-*/
-
-/*
-func (i *Images) dockerTag(s []string) {
-
-	registry := i.registry
-	for _, v := range s {
-		cmdStr := "docker tag " + v + registry + "/" + v
-		out, _ := exec.Command("/bin/sh", "-c", cmdStr).Output()
-		text.Write(out)
-	}
-}
-*/
