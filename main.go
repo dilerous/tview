@@ -50,7 +50,7 @@ type Images struct {
 	server   string
 }
 
-func setLogger() {
+func init() {
 
 	file, error := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if error != nil {
@@ -65,7 +65,6 @@ func setLogger() {
 func main() {
 
 	text.SetBorder(true)
-	setLogger()
 
 	pages.AddPage("Menu", menu, true, true).
 		AddPage("View", text, true, false).
@@ -165,7 +164,7 @@ func (i *Images) pushImages() {
 
 	if i.tagged == nil {
 		log.Printf("There are no tagged images: %v", i.tagged)
-		text.SetText("There are no tagged images").
+		text.SetText("There are no tagged images. Please Tag Images and try again.").
 			SetTextColor(tcell.ColorRed)
 	}
 
@@ -281,6 +280,11 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 
 func (i *Images) dockerPush(s []string) {
 	i.server = "docker.io"
+
+	form.SetBorder(true).
+		SetTitle(" cnvrg.io Deployment Tool ").
+		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(tcell.ColorGreen)
 
 	form.AddInputField("Docker Username: ", "", 40, nil, func(user string) {
 		i.username = user
