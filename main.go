@@ -143,11 +143,19 @@ func (i *Images) tagImages(s []string) {
 	}()
 
 	var target []string
-	i.server = "docker.io"
+
+	if i.server == "" {
+		i.server = "docker.io"
+	}
 
 	for _, v := range s {
-		err := cli.ImageTag(ctx, v, i.server+"/"+i.registry+"/"+v)
-		target = append(target, i.server+"/"+i.registry+"/"+v)
+
+		splitString := strings.Split(v, "/")
+		lenString := len(splitString)
+		image := splitString[lenString-1]
+
+		err := cli.ImageTag(ctx, v, i.server+"/"+i.registry+"/"+image)
+		target = append(target, i.server+"/"+i.registry+"/"+image)
 		i.tagged = target
 		if err != nil {
 			panic(err)

@@ -1,3 +1,3 @@
-hello-world
-nginx
-busybox
+docker.io/cnvrg/hello-world
+docker.io/cnvrg/nginx
+docker.io/cnvrg/busybox
