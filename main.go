@@ -106,7 +106,8 @@ func (i *Images) mainMenu() {
 		SetTitleColor(tcell.ColorGreen)
 
 	text.SetText("Please enter the Docker Hub credientials provided by cnvrg.io to download the images needed.").
-		SetWordWrap(true)
+		SetWordWrap(true).
+		SetTextColor(tcell.ColorWhite)
 
 	menu.AddInputField("cnvrg.io Docker Username: ", "cnvrghelm", 40, nil, func(user string) {
 		i.username = user
@@ -294,6 +295,10 @@ func (i *Images) dockerPush(s []string) {
 		SetTitleAlign(tview.AlignCenter).
 		SetTitleColor(tcell.ColorGreen)
 
+	text.SetText("Please enter the private registry credientials to push images.").
+		SetWordWrap(true).
+		SetTextColor(tcell.ColorWhite)
+
 	form.AddInputField("Docker Username: ", "", 40, nil, func(user string) {
 		i.username = user
 	}).AddPasswordField("Docker Password: ", "", 40, 42, func(password string) {
@@ -302,20 +307,20 @@ func (i *Images) dockerPush(s []string) {
 		i.server = server
 	}).AddInputField("Registry: ", "", 40, nil, func(registry string) {
 		i.registry = registry
-	}).AddButton("Return to Menu", func() {
+	}).AddButton("Return to Main Menu", func() {
 		form.Clear(true)
 		pages.SwitchToPage("Menu")
 		app.SetFocus(menu)
+	}).AddButton("Tag Images", func() {
+		text.Clear()
+		f, _ := readFile(i.fileName)
+		i.tagImages(f)
 	}).AddButton("Push to Registry", func() {
 		text.Clear()
 		i.pushImages()
 	}).AddButton("List Images", func() {
 		text.Clear()
 		listImages()
-	}).AddButton("Tag Images", func() {
-		text.Clear()
-		f, _ := readFile(i.fileName)
-		i.tagImages(f)
 	})
 }
 
