@@ -12,25 +12,12 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
 
 var (
-	app  = tview.NewApplication()
-	text = tview.NewTextView().
-		SetTextColor(tcell.ColorWhite).
-		ScrollToEnd().
-		SetScrollable(true).
-		SetChangedFunc(func() {
-			app.Draw()
-		})
-	pages    = tview.NewPages()
-	flex     = tview.NewFlex()
-	form     = tview.NewForm()
-	menu     = tview.NewForm()
 	ctx      = context.Background()
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 )
@@ -64,38 +51,46 @@ func init() {
 
 func main() {
 
-	text.SetBorder(true)
+	//i := Images{}
+	runTview()
+	//mainMenu(&i)
 
-	pages.AddPage("Menu", menu, true, true).
-		AddPage("View", text, true, false).
-		AddPage("Push", form, true, false).
-		SetBorder(true)
+	/*
+		text.SetBorder(true)
 
-	flex.AddItem(pages, 0, 4, true).
-		AddItem(text, 0, 4, false)
+		pages.AddPage("Menu", menu, true, true).
+			AddPage("View", text, true, false).
+			AddPage("Push", form, true, false).
+			SetBorder(true)
 
-	flex.SetDirection(tview.FlexRow)
+		flex.AddItem(pages, 0, 4, true).
+			AddItem(text, 0, 4, false)
 
-	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 113 {
-			app.Stop()
-		} else if event.Rune() == 27 {
-			form.Clear(true)
-			pages.SwitchToPage("Menu")
-			app.SetFocus(menu)
-		}
-		return event
-	})
+		flex.SetDirection(tview.FlexRow)
 
-	i := Images{}
-	i.mainMenu()
+		flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Rune() == 113 {
+				app.Stop()
+			} else if event.Rune() == 27 {
+				form.Clear(true)
+				pages.SwitchToPage("Menu")
+				app.SetFocus(menu)
+			}
+			return event
+		})
+	*/
 
+}
+
+/*
 	if err := app.SetRoot(flex, true).EnableMouse(true).Run(); err != nil {
 		log.Println(err)
 		panic(err)
 	}
 }
+*/
 
+/*
 func (i *Images) mainMenu() {
 
 	i.username = "cnvrghelm"
@@ -131,10 +126,12 @@ func (i *Images) mainMenu() {
 	})
 
 }
+*/
 
 // s []string is source image.
 // t string is the target which is pulled from registry input field.
-func (i *Images) tagImages(s []string) {
+func tagImages(i *Images, s []string) {
+	InfoLogger.Printf("The value of the slice is: %v", s)
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -159,6 +156,7 @@ func (i *Images) tagImages(s []string) {
 		target = append(target, i.server+"/"+i.registry+"/"+image)
 		i.tagged = target
 		if err != nil {
+			ErrorLogger.Println(err)
 			panic(err)
 		}
 	}
@@ -169,7 +167,7 @@ func (i *Images) tagImages(s []string) {
 }
 
 // s []string is list of images to push
-func (i *Images) pushImages() {
+func pushImages(i *Images) {
 
 	if i.tagged == nil {
 		log.Printf("There are no tagged images: %v", i.tagged)
@@ -213,6 +211,9 @@ func (i *Images) streamPushToWriter(image string) {
 		}
 		defer r.Close()
 		io.Copy(text, r)
+		log.Println(text)
+		text.SetText("Success! All Images uploaded successfully.").
+			SetTextColor(tcell.ColorGreen)
 	}()
 }
 
@@ -253,6 +254,11 @@ func (i *Images) pullImages(s []string) {
 	for _, v := range s {
 		i.streamPullToWriter(v, cli)
 	}
+	/*
+		text.SetText("Success! All Images downloaded successfully. Check logs for details.").
+			SetTextColor(tcell.ColorGreen).
+			SetWordWrap(true)
+	*/
 }
 
 // takes images as a string and streams the update to text
@@ -273,7 +279,7 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(err)
+				InfoLogger.Println(err)
 				handlePanic(err)
 			}
 		}()
@@ -284,9 +290,11 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 		}
 		defer out.Close()
 		io.Copy(text, out)
+		log.Println(text)
 	}()
 }
 
+/*
 func (i *Images) dockerPush(s []string) {
 	i.server = "docker.io"
 
@@ -323,6 +331,7 @@ func (i *Images) dockerPush(s []string) {
 		listImages()
 	})
 }
+*/
 
 func handlePanic(err interface{}) {
 	InfoLogger.Println("In the handlePanic function")
