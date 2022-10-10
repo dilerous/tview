@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,7 +22,6 @@ var (
 	flex  = tview.NewFlex()
 	form  = tview.NewForm()
 	menu  = tview.NewForm()
-	//img   = Images{}
 )
 
 func runTview() {
@@ -128,4 +129,40 @@ func pushMenu(i *Images, s []string) {
 		text.Clear()
 		listImages()
 	})
+}
+
+// Prints to screen the text
+// Define the color, options are white, red, green
+func setText(s string, c string) {
+	if c == "white" {
+		text.SetTextColor(tcell.ColorWhite).
+			SetText(s)
+	}
+	if c == "red" {
+		text.SetTextColor(tcell.ColorRed).
+			SetText(s)
+	}
+	if c == "green" {
+		text.SetTextColor(tcell.ColorRed).
+			SetText(s)
+	}
+
+}
+
+func updateText(s []string, e error) {
+
+	if e != nil {
+		text.SetTextColor(tcell.ColorRed).
+			SetText(e.Error())
+	} else {
+		sString := strings.Join(s, "\n")
+		text.SetTextColor(tcell.ColorWhite).
+			SetText(sString)
+	}
+}
+
+func handlePanic(err interface{}) {
+	InfoLogger.Println("In the handlePanic function")
+	text.SetTextColor(tcell.ColorRed).
+		SetText(fmt.Sprint(err))
 }

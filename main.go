@@ -11,8 +11,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gdamore/tcell/v2"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
@@ -52,6 +50,7 @@ func init() {
 func main() {
 
 	runTview()
+
 }
 
 // s []string is source image.
@@ -88,8 +87,7 @@ func tagImages(i *Images, s []string) {
 	}
 
 	sString := strings.Join(target, "\n")
-	text.SetTextColor(tcell.ColorWhite).
-		SetText(sString)
+	setText(sString, "white")
 }
 
 // s []string is list of images to push
@@ -97,8 +95,7 @@ func pushImages(i *Images) {
 
 	if i.tagged == nil {
 		log.Printf("There are no tagged images: %v", i.tagged)
-		text.SetText("There are no tagged images. Please Tag Images and try again.").
-			SetTextColor(tcell.ColorRed)
+		setText("There are no tagged images. Please Tag Images and try again.", "red")
 	}
 
 	for _, v := range i.tagged {
@@ -138,8 +135,8 @@ func (i *Images) streamPushToWriter(image string) {
 		defer r.Close()
 		io.Copy(text, r)
 		log.Println(text)
-		text.SetText("Success! All Images uploaded successfully.").
-			SetTextColor(tcell.ColorGreen)
+		setText("Success! All Images uploaded successfully.", "green")
+
 	}()
 }
 
@@ -164,8 +161,7 @@ func listImages() {
 		imageId = append(imageId, image.RepoTags...)
 	}
 	sString := strings.Join(imageId, "\n")
-	text.SetTextColor(tcell.ColorWhite).
-		SetText(sString)
+	setText(sString, "white")
 }
 
 // s []string is a slice of images
@@ -173,8 +169,7 @@ func (i *Images) pullImages(s []string) {
 
 	if fmt.Sprint(s) == "[]" {
 		log.Printf("No data was passed to the slice: %v\n", s)
-		text.SetText("Please input a valid Images File and try again").
-			SetTextColor(tcell.ColorRed)
+		setText("Please input a valid Images File and try again", "red")
 	}
 
 	for _, v := range s {
@@ -216,24 +211,6 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 	}()
 }
 
-func handlePanic(err interface{}) {
-	InfoLogger.Println("In the handlePanic function")
-	text.SetTextColor(tcell.ColorRed).
-		SetText(fmt.Sprint(err))
-}
-
-func updateText(s []string, e error) {
-
-	if e != nil {
-		text.SetTextColor(tcell.ColorRed).
-			SetText(e.Error())
-	} else {
-		sString := strings.Join(s, "\n")
-		text.SetTextColor(tcell.ColorWhite).
-			SetText(sString)
-	}
-}
-
 func readFile(f string) ([]string, error) {
 
 	file, err := os.Open(f)
@@ -254,9 +231,3 @@ func readFile(f string) ([]string, error) {
 	}
 	return images, err
 }
-
-/*
-	text.SetText("Success! All Images downloaded successfully. Check logs for details.").
-		SetTextColor(tcell.ColorGreen).
-		SetWordWrap(true)
-*/
