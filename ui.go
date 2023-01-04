@@ -58,6 +58,23 @@ func runTview() {
 	}
 }
 
+func startMenu() {
+
+	text.SetText("testing").SetTextColor(tcell.ColorWhite).
+		SetBorder(true).
+		SetTitle("cnvrg.io Deployment Tool").
+		SetTitleColor(tcell.ColorGreen)
+
+	initKube()
+
+	flex.Clear()
+	flex.AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(text, 0, 1, false).
+		AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
+		AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false)
+
+}
+
 func mainMenu(i *Images) {
 
 	i.username = "cnvrghelm"
@@ -90,8 +107,9 @@ func mainMenu(i *Images) {
 		f, _ := readFile(i.fileName)
 		pushMenu(i, f)
 		pages.SwitchToPage("Push")
+	}).AddButton("Start Menu", func() {
+		startMenu()
 	})
-
 }
 
 func pushMenu(i *Images, s []string) {
@@ -143,7 +161,7 @@ func setText(s string, c string) {
 			SetText(s)
 	}
 	if c == "green" {
-		text.SetTextColor(tcell.ColorRed).
+		text.SetTextColor(tcell.ColorGreen).
 			SetText(s)
 	}
 
