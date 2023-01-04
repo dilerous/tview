@@ -1,4 +1,4 @@
-module tview/test
+module tview/cnvrg-dep-tool
 
 go 1.18
 
