@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,24 +23,38 @@ func initKube() {
 	//getNodes()
 	//createPod()
 	getImage("test-pod", "default")
+	getVersions("kubernetes-dashboard", "kubernetes-dashboard")
 }
 
-/*
-func getVersions() {
+func getVersions(name string, namespace string) {
 
-	deploy := clientset.AppsV1().Deployments("cnvrg").Get(ctx, app)
-
-	app, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+	deploy, err := clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
-		log.Fatal(err)
-	}
-	for _, p := range app.Items {
-		setText("cnvrg-app version:"+p.Spec.Containers[0].Image, "white")
-		log.Println(p.Spec.Containers[0].Image)
+		log.Println(err)
 	}
 
+	test := []string{}
+	someText := "Here is some text"
+
+	imageName := deploy.Spec.Template.Spec.Containers[0].Image
+
+	final := append(test, someText, imageName)
+
+	a := strings.Join(final, "\n")
+	setText(a, "white")
+
+	/*
+		app, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, p := range app.Items {
+			setText("cnvrg-app version:"+p.Spec.Containers[0].Image, "white")
+			log.Println(p.Spec.Containers[0].Image)
+		}
+	*/
+
 }
-*/
 
 func getNodes() {
 	nodeList, err := clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
@@ -95,6 +110,7 @@ func checkPodExists(name string, namespace string) bool {
 	return result
 }
 
+// Pass in the name of the pod, Namespace of the Pod
 func getImage(name string, namespace string) {
 
 	pods, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
@@ -108,7 +124,6 @@ func getImage(name string, namespace string) {
 }
 
 /*
-
 func getResourcesDynamically(dynamic dynamic.Interface, ctx context.Context,
 	group string, version string, resource string, namespace string) (
 	[]unstructured.Unstructured, error) {
@@ -128,7 +143,6 @@ func getResourcesDynamically(dynamic dynamic.Interface, ctx context.Context,
 	return list.Items, nil
 }
 
-/*
 func GetDeployments(clientset *kubernetes.Clientset, ctx context.Context,
 	namespace string) ([]v1.Deployment, error) {
 

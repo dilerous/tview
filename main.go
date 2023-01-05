@@ -50,7 +50,6 @@ func init() {
 func main() {
 
 	//initKube()
-
 	runTview()
 
 }
