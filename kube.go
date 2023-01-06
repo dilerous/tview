@@ -19,26 +19,43 @@ var (
 	clientset  = kubernetes.NewForConfigOrDie(config)
 )
 
+// TODO Add function that checks if a kubeconfig file exisits and don't panic, just print error to screen
+
 func initKube() {
 	//getNodes()
 	//createPod()
 	getImage("test-pod", "default")
-	getVersions("kubernetes-dashboard", "kubernetes-dashboard")
+	getVersions("nginx-deployment", "default")
 }
+
+/*
+type Versions struct {
+	app      string
+	operator string
+	kube     string
+}
+*/
 
 func getVersions(name string, namespace string) {
 
-	deploy, err := clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
+	appDeploy, err := clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
+	appImage := appDeploy.Spec.Template.Spec.Containers[0].Image
+	appVersion := strings.Split(appImage, ":")
+
+	operatorDeploy, err := clientset.AppsV1().Deployments("kube-system").Get(ctx, "coredns", metav1.GetOptions{})
+	if err != nil {
+		log.Println(err)
+	}
+	operatorImage := operatorDeploy.Spec.Template.Spec.Containers[0].Image
+	operatorVersion := strings.Split(operatorImage, ":")
 
 	test := []string{}
 	someText := "Here is some text"
 
-	imageName := deploy.Spec.Template.Spec.Containers[0].Image
-
-	final := append(test, someText, imageName)
+	final := append(test, someText, "cnvrg-app version: "+appVersion[len(appVersion)-1], "operator version: "+operatorVersion[len(operatorVersion)-1])
 
 	a := strings.Join(final, "\n")
 	setText(a, "white")

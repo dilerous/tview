@@ -22,6 +22,8 @@ var (
 	flex  = tview.NewFlex()
 	form  = tview.NewForm()
 	menu  = tview.NewForm()
+
+	DEFAULT_USERNAME = "cnvrghelm"
 )
 
 func runTview() {
@@ -38,6 +40,7 @@ func runTview() {
 
 	flex.SetDirection(tview.FlexRow)
 
+	// FIXME Look to remove this code, not sure it does anything
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 113 {
 			app.Stop()
@@ -77,7 +80,7 @@ func startMenu() {
 
 func mainMenu(i *Images) {
 
-	i.username = "cnvrghelm"
+	i.username = DEFAULT_USERNAME
 
 	menu.SetBorder(true).
 		SetTitle(" cnvrg.io Deployment Tool ").
@@ -88,7 +91,7 @@ func mainMenu(i *Images) {
 		SetWordWrap(true).
 		SetTextColor(tcell.ColorWhite)
 
-	menu.AddInputField("cnvrg.io Docker Username: ", "cnvrghelm", 40, nil, func(user string) {
+	menu.AddInputField("cnvrg.io Docker Username: ", i.username, 40, nil, func(user string) {
 		i.username = user
 	}).AddPasswordField("cnvrg.io Docker Password: ", "", 40, 42, func(password string) {
 		i.password = password
