@@ -12,50 +12,53 @@ import (
 )
 
 var (
-	//ctx         = context.Background()
 	rules      = clientcmd.NewDefaultClientConfigLoadingRules()
 	kubeconfig = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
 	config, _  = kubeconfig.ClientConfig()
 	clientset  = kubernetes.NewForConfigOrDie(config)
 )
 
+type Versions struct {
+	appName      string
+	appNS        string
+	operatorName string
+	operatorNS   string
+	kube         string
+}
+
 // TODO Add function that checks if a kubeconfig file exisits and don't panic, just print error to screen
 
 func initKube() {
-	//getNodes()
-	//createPod()
-	getImage("test-pod", "default")
-	getVersions("nginx-deployment", "default")
+
+	v := Versions{
+		appName:      "nginx-deployment",
+		appNS:        "default",
+		operatorName: "coredns",
+		operatorNS:   "kube-system",
+	}
+	v.getVersions()
+
 }
 
-/*
-type Versions struct {
-	app      string
-	operator string
-	kube     string
-}
-*/
+func (v *Versions) getVersions() {
 
-func getVersions(name string, namespace string) {
-
-	appDeploy, err := clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
+	appDeploy, err := clientset.AppsV1().Deployments(v.appNS).Get(ctx, v.appName, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
 	appImage := appDeploy.Spec.Template.Spec.Containers[0].Image
 	appVersion := strings.Split(appImage, ":")
 
-	operatorDeploy, err := clientset.AppsV1().Deployments("kube-system").Get(ctx, "coredns", metav1.GetOptions{})
+	operatorDeploy, err := clientset.AppsV1().Deployments(v.operatorNS).Get(ctx, v.operatorName, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
 	operatorImage := operatorDeploy.Spec.Template.Spec.Containers[0].Image
 	operatorVersion := strings.Split(operatorImage, ":")
 
-	test := []string{}
 	someText := "Here is some text"
 
-	final := append(test, someText, "cnvrg-app version: "+appVersion[len(appVersion)-1], "operator version: "+operatorVersion[len(operatorVersion)-1])
+	final := []string{someText, "cnvrg-app version: " + appVersion[len(appVersion)-1], "operator version: " + operatorVersion[len(operatorVersion)-1]}
 
 	a := strings.Join(final, "\n")
 	setText(a, "white")

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,11 @@ import (
 	"github.com/docker/docker/client"
 )
 
+var (
+	ctx    = context.Background()
+	cli, _ = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+)
+
 type Images struct {
 	fileName string
 	registry string
@@ -21,10 +27,13 @@ type Images struct {
 	server   string
 }
 
-// s []string is source image.
-// t string is the target which is pulled from registry input field.
-func tagImages(i *Images, s []string) {
+// s []string is source images.
+// the string is the target which is pulled from registry input field.
+// TODO make more descriptive possibly more descriptive function names
+func (i *Images) tagImages(s []string) {
 	InfoLogger.Printf("The value of the slice is: %v", s)
+
+	var target []string
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -32,8 +41,6 @@ func tagImages(i *Images, s []string) {
 			handlePanic(err)
 		}
 	}()
-
-	var target []string
 
 	if i.server == "" {
 		i.server = "docker.io"
@@ -58,8 +65,8 @@ func tagImages(i *Images, s []string) {
 	setText(sString, "white")
 }
 
-// s []string is list of images to push
-func pushImages(i *Images) {
+// Pushes the tagged images into the registry defined by the user
+func (i *Images) pushImages() {
 
 	if i.tag == nil {
 		log.Printf("There are no tagged images: %v", i.tag)
@@ -108,30 +115,6 @@ func (i *Images) streamPushToWriter(image string) {
 	}()
 }
 
-// Returns all images by Repo Tag as a []string slice
-func listImages() {
-
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			handlePanic(err)
-		}
-	}()
-
-	images, err := cli.ImageList(ctx, types.ImageListOptions{})
-	if err != nil {
-		panic(err)
-	}
-
-	var imageId []string
-
-	for _, image := range images {
-		imageId = append(imageId, image.RepoTags...)
-	}
-	sString := strings.Join(imageId, "\n")
-	setText(sString, "white")
-}
-
 // s []string is a slice of images
 func (i *Images) pullImages(s []string) {
 
@@ -177,4 +160,30 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 		io.Copy(text, out)
 		log.Println(text)
 	}()
+}
+
+// TODO think about breaking out the for loop to utils.go file
+// Make list images specific to UI and get images specific to Docker
+// Returns all images by Repo Tag as a []string slice
+func listImages() {
+
+	var imageId []string
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			handlePanic(err)
+		}
+	}()
+
+	images, err := cli.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, image := range images {
+		imageId = append(imageId, image.RepoTags...)
+	}
+	sString := strings.Join(imageId, "\n")
+	setText(sString, "white")
 }

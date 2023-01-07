@@ -142,10 +142,10 @@ func pushMenu(i *Images, s []string) {
 	}).AddButton("Tag Images", func() {
 		text.Clear()
 		f, _ := readFile(i.fileName)
-		tagImages(i, f)
+		i.tagImages(f)
 	}).AddButton("Push to Registry", func() {
 		text.Clear()
-		pushImages(i)
+		i.pushImages()
 	}).AddButton("List Images", func() {
 		text.Clear()
 		listImages()

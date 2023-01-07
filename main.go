@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
-
-	"github.com/docker/docker/client"
 )
 
 var (
-	ctx    = context.Background()
-	cli, _ = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	//ctx    = context.Background()
+	//cli, _ = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
 	WarningLogger *log.Logger
 	InfoLogger    *log.Logger
