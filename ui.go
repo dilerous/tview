@@ -75,6 +75,11 @@ func startMenu() {
 		AddItem(text, 0, 1, false).
 		AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
 		AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false)
+	menu.AddButton("Return to Main Menu", func() {
+		form.Clear(true)
+		pages.SwitchToPage("Menu")
+		app.SetFocus(menu)
+	})
 
 }
 

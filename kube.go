@@ -14,8 +14,6 @@ import (
 var (
 	rules      = clientcmd.NewDefaultClientConfigLoadingRules()
 	kubeconfig = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
-	config, _  = kubeconfig.ClientConfig()
-	clientset  = kubernetes.NewForConfigOrDie(config)
 )
 
 type Versions struct {
@@ -24,17 +22,32 @@ type Versions struct {
 	operatorName string
 	operatorNS   string
 	kube         string
+	clientset    kubernetes.Clientset
 }
 
 // TODO Add function that checks if a kubeconfig file exisits and don't panic, just print error to screen
 
 func initKube() {
 
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			handlePanic(err)
+		}
+	}()
+
+	config, err := kubeconfig.ClientConfig()
+	if err != nil {
+		panic(err)
+	}
+	clientset := kubernetes.NewForConfigOrDie(config)
+
 	v := Versions{
 		appName:      "nginx-deployment",
 		appNS:        "default",
 		operatorName: "coredns",
 		operatorNS:   "kube-system",
+		clientset:    *clientset,
 	}
 	v.getVersions()
 
@@ -42,14 +55,14 @@ func initKube() {
 
 func (v *Versions) getVersions() {
 
-	appDeploy, err := clientset.AppsV1().Deployments(v.appNS).Get(ctx, v.appName, metav1.GetOptions{})
+	appDeploy, err := v.clientset.AppsV1().Deployments(v.appNS).Get(ctx, v.appName, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
 	appImage := appDeploy.Spec.Template.Spec.Containers[0].Image
 	appVersion := strings.Split(appImage, ":")
 
-	operatorDeploy, err := clientset.AppsV1().Deployments(v.operatorNS).Get(ctx, v.operatorName, metav1.GetOptions{})
+	operatorDeploy, err := v.clientset.AppsV1().Deployments(v.operatorNS).Get(ctx, v.operatorName, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
@@ -63,21 +76,10 @@ func (v *Versions) getVersions() {
 	a := strings.Join(final, "\n")
 	setText(a, "white")
 
-	/*
-		app, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, p := range app.Items {
-			setText("cnvrg-app version:"+p.Spec.Containers[0].Image, "white")
-			log.Println(p.Spec.Containers[0].Image)
-		}
-	*/
-
 }
 
-func getNodes() {
-	nodeList, err := clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+func (v Versions) getNodes() {
+	nodeList, err := v.clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -87,7 +89,7 @@ func getNodes() {
 	}
 }
 
-func createPod() {
+func (v *Versions) createPod(clientset *kubernetes.Clientset) {
 	newPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-pod",
@@ -99,11 +101,11 @@ func createPod() {
 		},
 	}
 
-	if checkPodExists("test-pod", "default") {
+	if v.checkPodExists("test-pod", "default") {
 		fmt.Println("Pod already exists")
 	}
 
-	if !checkPodExists("test-pod", "default") {
+	if !v.checkPodExists("test-pod", "default") {
 		pod, err := clientset.CoreV1().Pods("default").Create(ctx, newPod, metav1.CreateOptions{})
 		if err != nil {
 			panic(err)
@@ -112,11 +114,11 @@ func createPod() {
 	}
 }
 
-func checkPodExists(name string, namespace string) bool {
+func (v *Versions) checkPodExists(name string, namespace string) bool {
 
 	result := false
 
-	pods, err := clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+	pods, err := v.clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -131,9 +133,9 @@ func checkPodExists(name string, namespace string) bool {
 }
 
 // Pass in the name of the pod, Namespace of the Pod
-func getImage(name string, namespace string) {
+func (v *Versions) getImage(name string, namespace string) {
 
-	pods, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+	pods, err := v.clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -242,4 +244,15 @@ func createDeployment(ctx context.Context, config *rest.Config, ns string) error
 		return err
 	}
 }
+*/
+
+/*
+	app, err := clientset.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, p := range app.Items {
+		setText("cnvrg-app version:"+p.Spec.Containers[0].Image, "white")
+		log.Println(p.Spec.Containers[0].Image)
+	}
 */
