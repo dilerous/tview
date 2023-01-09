@@ -72,14 +72,9 @@ func startMenu() {
 
 	flex.Clear()
 	flex.AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(text, 0, 1, false).
+		AddItem(text, 0, 1, true).
 		AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
 		AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false)
-	menu.AddButton("Return to Main Menu", func() {
-		form.Clear(true)
-		pages.SwitchToPage("Menu")
-		app.SetFocus(menu)
-	})
 
 }
 
@@ -187,6 +182,7 @@ func updateText(s []string, e error) {
 	}
 }
 
+// Changes text to the color red and prints the error to the UI
 func handlePanic(err interface{}) {
 	InfoLogger.Println("In the handlePanic function")
 	text.SetTextColor(tcell.ColorRed).

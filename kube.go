@@ -25,8 +25,8 @@ type Versions struct {
 	clientset    kubernetes.Clientset
 }
 
-// TODO Add function that checks if a kubeconfig file exisits and don't panic, just print error to screen
-
+// Initalizes the kube environment, checks for a kube config, if one doesn't
+// exist an error is printed to the screen.
 func initKube() {
 
 	defer func() {
