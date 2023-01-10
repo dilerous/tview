@@ -18,10 +18,12 @@ var (
 		SetChangedFunc(func() {
 			app.Draw()
 		})
-	pages = tview.NewPages()
-	flex  = tview.NewFlex()
-	form  = tview.NewForm()
-	menu  = tview.NewForm()
+	pages   = tview.NewPages()
+	flex    = tview.NewFlex()
+	form    = tview.NewForm()
+	menu    = tview.NewForm()
+	start   = tview.NewForm()
+	topText = tview.NewTextView()
 
 	DEFAULT_USERNAME = "cnvrghelm"
 )
@@ -33,9 +35,11 @@ func runTview() {
 	pages.AddPage("Menu", menu, true, true).
 		AddPage("View", text, true, false).
 		AddPage("Push", form, true, false).
+		AddPage("StartMenu", start, true, false).
 		SetBorder(true)
 
-	flex.AddItem(pages, 0, 4, true).
+	flex.AddItem(topText, 0, 1, true).
+		AddItem(pages, 0, 3, true).
 		AddItem(text, 0, 4, false)
 
 	flex.SetDirection(tview.FlexRow)
@@ -48,6 +52,7 @@ func runTview() {
 			form.Clear(true)
 			pages.SwitchToPage("Menu")
 			app.SetFocus(menu)
+			setText("You pressed ESC", "white")
 		}
 		return event
 	})
@@ -63,33 +68,37 @@ func runTview() {
 
 func startMenu() {
 
-	text.SetText("testing").SetTextColor(tcell.ColorWhite).
+	start.Clear(true)
+
+	start.SetTitle(" Menu ").
 		SetBorder(true).
-		SetTitle("cnvrg.io Deployment Tool").
 		SetTitleColor(tcell.ColorGreen)
 
+	start.AddButton("cnvrg Image Tool", func() {
+		pages.SwitchToPage("Menu")
+		app.SetFocus(menu)
+	})
 	initKube()
-
-	flex.Clear()
-	flex.AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(text, 0, 1, true).
-		AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
-		AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false)
 
 }
 
 func mainMenu(i *Images) {
 
 	i.username = DEFAULT_USERNAME
+	startMenu()
 
 	menu.SetBorder(true).
-		SetTitle(" cnvrg.io Deployment Tool ").
+		SetTitle(" Menu ").
 		SetTitleAlign(tview.AlignCenter).
 		SetTitleColor(tcell.ColorGreen)
 
 	text.SetText("Please enter the Docker Hub credientials provided by cnvrg.io to download the images needed.").
 		SetWordWrap(true).
 		SetTextColor(tcell.ColorWhite)
+
+	topText.SetBorder(true).
+		SetTitle("cnvrg.io Deployment Tool").
+		SetTitleColor(tcell.ColorGreen)
 
 	menu.AddInputField("cnvrg.io Docker Username: ", i.username, 40, nil, func(user string) {
 		i.username = user
@@ -112,6 +121,7 @@ func mainMenu(i *Images) {
 		pages.SwitchToPage("Push")
 	}).AddButton("Start Menu", func() {
 		startMenu()
+		pages.SwitchToPage("StartMenu")
 	})
 }
 
@@ -170,6 +180,24 @@ func setText(s string, c string) {
 
 }
 
+// Prints to screen the text
+// Define the color, options are white, red, green
+func setTopText(s string, c string) {
+	if c == "white" {
+		topText.SetTextColor(tcell.ColorWhite).
+			SetText(s)
+	}
+	if c == "red" {
+		topText.SetTextColor(tcell.ColorRed).
+			SetText(s)
+	}
+	if c == "green" {
+		topText.SetTextColor(tcell.ColorGreen).
+			SetText(s)
+	}
+
+}
+
 func updateText(s []string, e error) {
 
 	if e != nil {
@@ -186,5 +214,12 @@ func updateText(s []string, e error) {
 func handlePanic(err interface{}) {
 	InfoLogger.Println("In the handlePanic function")
 	text.SetTextColor(tcell.ColorRed).
+		SetText(fmt.Sprint(err))
+}
+
+// Changes text to the color red and prints the error to the UI
+func handlePanicTop(err interface{}) {
+	InfoLogger.Println("In the handlePanic function")
+	topText.SetTextColor(tcell.ColorRed).
 		SetText(fmt.Sprint(err))
 }

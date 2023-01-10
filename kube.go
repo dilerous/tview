@@ -32,7 +32,7 @@ func initKube() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			handlePanic(err)
+			handlePanicTop(err)
 		}
 	}()
 
@@ -69,12 +69,10 @@ func (v *Versions) getVersions() {
 	operatorImage := operatorDeploy.Spec.Template.Spec.Containers[0].Image
 	operatorVersion := strings.Split(operatorImage, ":")
 
-	someText := "Here is some text"
-
-	final := []string{someText, "cnvrg-app version: " + appVersion[len(appVersion)-1], "operator version: " + operatorVersion[len(operatorVersion)-1]}
+	final := []string{"cnvrg-app version: " + appVersion[len(appVersion)-1], "operator version: " + operatorVersion[len(operatorVersion)-1]}
 
 	a := strings.Join(final, "\n")
-	setText(a, "white")
+	setTopText(a, "white")
 
 }
 
