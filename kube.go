@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -21,7 +19,6 @@ type Versions struct {
 	appNS        string
 	operatorName string
 	operatorNS   string
-	kube         string
 	clientset    kubernetes.Clientset
 }
 
@@ -76,6 +73,7 @@ func (v *Versions) getVersions() {
 
 }
 
+/*
 func (v Versions) getNodes() {
 	nodeList, err := v.clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -86,7 +84,9 @@ func (v Versions) getNodes() {
 		fmt.Println(n.Name)
 	}
 }
+*/
 
+/*
 func (v *Versions) createPod(clientset *kubernetes.Clientset) {
 	newPod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -111,7 +111,9 @@ func (v *Versions) createPod(clientset *kubernetes.Clientset) {
 		fmt.Printf("Pod create, %v", pod.Name)
 	}
 }
+*/
 
+/*
 func (v *Versions) checkPodExists(name string, namespace string) bool {
 
 	result := false
@@ -130,6 +132,10 @@ func (v *Versions) checkPodExists(name string, namespace string) bool {
 	return result
 }
 
+*/
+
+/*
+
 // Pass in the name of the pod, Namespace of the Pod
 func (v *Versions) getImage(name string, namespace string) {
 
@@ -142,6 +148,8 @@ func (v *Versions) getImage(name string, namespace string) {
 		log.Println(p.Spec.Containers[0].Image)
 	}
 }
+
+*/
 
 /*
 func getResourcesDynamically(dynamic dynamic.Interface, ctx context.Context,

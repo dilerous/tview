@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 )
@@ -25,4 +26,9 @@ func readFile(f string) ([]string, error) {
 		log.Fatal(err)
 	}
 	return images, err
+}
+
+func tarImages() {
+
+	fmt.Println("In the tar images function")
 }
