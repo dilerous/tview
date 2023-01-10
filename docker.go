@@ -187,3 +187,8 @@ func listImages() {
 	sString := strings.Join(imageId, "\n")
 	setText(sString, "white")
 }
+
+func dockerSave() {
+	InfoLogger.Println("In the docker save function")
+
+}

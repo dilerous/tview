@@ -24,7 +24,6 @@ var (
 	menu    = tview.NewForm()
 	start   = tview.NewForm()
 	topText = tview.NewTextView()
-	tar     = tview.NewForm()
 
 	DEFAULT_USERNAME = "cnvrghelm"
 )
@@ -37,7 +36,6 @@ func runTview() {
 		AddPage("View", text, true, false).
 		AddPage("Push", form, true, false).
 		AddPage("StartMenu", start, true, false).
-		AddPage("tarImages", tar, true, false).
 		SetBorder(true)
 
 	flex.AddItem(topText, 0, 1, true).
@@ -122,12 +120,16 @@ func mainMenu(i *Images) {
 		pushMenu(i, f)
 		pages.SwitchToPage("Push")
 	}).AddButton("TAR Images", func() {
-		tarImages()
-		pages.SwitchToPage("tarImages")
+		fileToTar := []string{"tartestfile1.txt"}
+		s := initArchive(fileToTar)
+		if s != "" {
+			setText(s, "white")
+		}
 	}).AddButton("Start Menu", func() {
 		startMenu()
 		pages.SwitchToPage("StartMenu")
 	})
+
 }
 
 func pushMenu(i *Images, s []string) {
