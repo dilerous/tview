@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -25,6 +27,7 @@ type Images struct {
 	username string
 	password string
 	server   string
+	imageId  []string
 }
 
 // s []string is source images.
@@ -158,20 +161,19 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 		}
 		defer out.Close()
 		io.Copy(text, out)
-		log.Println(text)
+		InfoLogger.Println(text)
 	}()
 }
 
-// TODO think about breaking out the for loop to utils.go file
 // Make list images specific to UI and get images specific to Docker
-// Returns all images by Repo Tag as a []string slice
-func listImages() {
+// Returns all images as a string seperated by a new line
+func (i *Images) listImages() string {
 
-	var imageId []string
+	var repoTags []string
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println(err)
+			InfoLogger.Println(err)
 			handlePanic(err)
 		}
 	}()
@@ -182,13 +184,67 @@ func listImages() {
 	}
 
 	for _, image := range images {
-		imageId = append(imageId, image.RepoTags...)
+		repoTags = append(repoTags, image.RepoTags...)
 	}
-	sString := strings.Join(imageId, "\n")
-	setText(sString, "white")
+
+	sString := strings.Join(repoTags, "\n")
+	return sString
 }
 
-func dockerSave() {
+//Pass in the i Images struck
+//Gets a list of Images on Docker host
+//Grabs the Image ID and puts that into the stuck as a slice
+
+func (i *Images) getImageId() {
+	InfoLogger.Println("In the getImageID function")
+
+	defer func() {
+		if err := recover(); err != nil {
+			ErrorLogger.Println(err)
+			handlePanic(err)
+		}
+	}()
+
+	images, err := cli.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, image := range images {
+		i.imageId = append(i.imageId, image.ID)
+	}
+
+}
+
+// Save the images pulled into a TAR file
+// This function requires a slice of Image IDs
+func (i *Images) saveImages() {
 	InfoLogger.Println("In the docker save function")
 
+	defer func() {
+		if err := recover(); err != nil {
+			ErrorLogger.Println(err)
+			handlePanic(err)
+		}
+	}()
+
+	i.getImageId()
+
+	f, err := os.Create("images.tar.gz")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	w := bufio.NewWriter(f)
+
+	save, err := cli.ImageSave(ctx, i.imageId)
+	if err != nil {
+		ErrorLogger.Println(err)
+		panic(err)
+	}
+	defer save.Close()
+
+	io.Copy(w, save)
+	f.Close()
+	save.Close()
 }

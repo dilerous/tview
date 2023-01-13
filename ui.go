@@ -119,15 +119,8 @@ func mainMenu(i *Images) {
 		f, _ := readFile(i.fileName)
 		pushMenu(i, f)
 		pages.SwitchToPage("Push")
-	}).AddButton("TAR Images", func() {
-		fileToTar := []string{"tartestfile1.txt"}
-		s := initArchive(fileToTar)
-		if s != "" {
-			setText(s, "white")
-		}
-	}).AddButton("Start Menu", func() {
-		startMenu()
-		pages.SwitchToPage("StartMenu")
+	}).AddButton("Save Images to TAR", func() {
+		i.saveImages()
 	})
 
 }
@@ -165,7 +158,7 @@ func pushMenu(i *Images, s []string) {
 		i.pushImages()
 	}).AddButton("List Images", func() {
 		text.Clear()
-		listImages()
+		setText(i.listImages(), "white")
 	})
 }
 
@@ -230,3 +223,16 @@ func handlePanicTop(err interface{}) {
 	topText.SetTextColor(tcell.ColorRed).
 		SetText(fmt.Sprint(err))
 }
+
+/*
+.AddButton("TAR Images", func() {
+		fileToTar := []string{"tartestfile1.txt"}
+		s := initArchive(fileToTar)
+		if s != "" {
+			setText(s, "white")
+		}
+.AddButton("Start Menu", func() {
+		startMenu()
+		pages.SwitchToPage("StartMenu")
+	})
+*/
