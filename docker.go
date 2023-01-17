@@ -193,7 +193,7 @@ func (i *Images) listImages() string {
 
 //Pass in the i Images struck
 //Gets a list of Images on Docker host
-//Grabs the Image ID and puts that into the stuck as a slice
+//Grabs the Image ID and puts that into the stuc as a slice
 
 func (i *Images) getImageId() {
 	InfoLogger.Println("In the getImageID function")
@@ -211,7 +211,7 @@ func (i *Images) getImageId() {
 	}
 
 	for _, image := range images {
-		i.imageId = append(i.imageId, image.ID)
+		i.imageId = append(i.imageId, image.RepoTags...)
 	}
 
 }
@@ -237,7 +237,10 @@ func (i *Images) saveImages() {
 	defer f.Close()
 	w := bufio.NewWriter(f)
 
+	//	go func() {
+
 	save, err := cli.ImageSave(ctx, i.imageId)
+
 	if err != nil {
 		ErrorLogger.Println(err)
 		panic(err)
@@ -247,4 +250,5 @@ func (i *Images) saveImages() {
 	io.Copy(w, save)
 	f.Close()
 	save.Close()
+	// }()
 }
