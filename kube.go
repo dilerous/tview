@@ -73,6 +73,10 @@ func (v *Versions) getVersions() {
 
 }
 
+func pgBackup() {
+	InfoLogger.Println("In the pg backup func")
+}
+
 /*
 func (v Versions) getNodes() {
 	nodeList, err := v.clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
