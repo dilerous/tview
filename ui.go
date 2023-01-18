@@ -120,7 +120,8 @@ func mainMenu(i *Images) {
 		pushMenu(i, f)
 		pages.SwitchToPage("Push")
 	}).AddButton("Save Images to TAR", func() {
-		i.saveImages()
+		s := i.saveImages()
+		setText(s, "green")
 	})
 
 }

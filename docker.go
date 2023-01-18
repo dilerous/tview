@@ -218,7 +218,7 @@ func (i *Images) getImageId() {
 
 // Save the images pulled into a TAR file
 // This function requires a slice of Image IDs
-func (i *Images) saveImages() {
+func (i *Images) saveImages() string {
 	InfoLogger.Println("In the docker save function")
 
 	defer func() {
@@ -237,7 +237,7 @@ func (i *Images) saveImages() {
 	defer f.Close()
 	w := bufio.NewWriter(f)
 
-	//	go func() {
+	setText("Creating TAR file named images.tar.gz", "white")
 
 	save, err := cli.ImageSave(ctx, i.imageId)
 
@@ -250,5 +250,6 @@ func (i *Images) saveImages() {
 	io.Copy(w, save)
 	f.Close()
 	save.Close()
-	// }()
+	return "TAR file successfully created"
+
 }
