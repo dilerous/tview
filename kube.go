@@ -40,10 +40,10 @@ func initKube() {
 	clientset := kubernetes.NewForConfigOrDie(config)
 
 	v := Versions{
-		appName:      "nginx-deployment",
-		appNS:        "default",
-		operatorName: "coredns",
-		operatorNS:   "kube-system",
+		appName:      "app",
+		appNS:        "cnvrg",
+		operatorName: "cnvrg-operator",
+		operatorNS:   "cnvrg",
 		clientset:    *clientset,
 	}
 	v.getVersions()
