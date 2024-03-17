@@ -12,12 +12,17 @@ import (
 	"strings"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
 
 var (
-	ctx    = context.Background()
-	cli, _ = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	ctx         = context.Background()
+	cli         = initClient()
+	dockerHosts = []string{
+		"unix:///var/run/docker.sock",
+		"unix:///Users/bsoper/.docker/run/docker.sock",
+	}
 )
 
 type Images struct {
@@ -28,6 +33,28 @@ type Images struct {
 	password string
 	server   string
 	imageId  []string
+}
+
+type AuthConfig struct {
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	ServerAddress string `json:"server,omitempty"`
+}
+
+func initClient() *client.Client {
+
+	for _, host := range dockerHosts {
+		cli, _ := client.NewClientWithOpts(client.WithHost(host),
+			client.FromEnv, client.WithAPIVersionNegotiation())
+
+		// Check if the client is working by listing containers
+		if _, err := cli.ContainerList(context.Background(), container.ListOptions{}); err != nil {
+			fmt.Printf("Failed to list containers for host %s: %v\n", host, err)
+			continue
+		}
+		return cli
+	}
+	return nil
 }
 
 // s []string is source images.
@@ -85,11 +112,12 @@ func (i *Images) pushImages() {
 // Requires username and password to auth
 func (i *Images) streamPushToWriter(image string) {
 
-	var authConfig = types.AuthConfig{
+	authConfig := AuthConfig{
 		Username:      i.username,
 		Password:      i.password,
 		ServerAddress: i.server,
 	}
+
 	encodedJSON, err := json.Marshal(authConfig)
 	if err != nil {
 		panic(err)
@@ -127,15 +155,15 @@ func (i *Images) pullImages(s []string) {
 	}
 
 	for _, v := range s {
-		i.streamPullToWriter(v, cli)
+		i.streamPullToWriter(v)
 	}
 
 }
 
 // takes images as a string and streams the update to text
-func (i *Images) streamPullToWriter(s string, c *client.Client) {
+func (i *Images) streamPullToWriter(s string) {
 
-	var authConfig = types.AuthConfig{
+	var authConfig = AuthConfig{
 		Username:      i.username,
 		Password:      i.password,
 		ServerAddress: i.server,
@@ -155,8 +183,9 @@ func (i *Images) streamPullToWriter(s string, c *client.Client) {
 			}
 		}()
 
-		out, err := c.ImagePull(ctx, s, types.ImagePullOptions{RegistryAuth: authStr})
+		out, err := cli.ImagePull(ctx, s, types.ImagePullOptions{RegistryAuth: authStr})
 		if err != nil {
+			ErrorLogger.Println("There is a problem with the client", err)
 			panic(err)
 		}
 		defer out.Close()

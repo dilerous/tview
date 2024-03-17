@@ -46,9 +46,8 @@ func runTview() {
 
 	// FIXME Look to remove this code, not sure it does anything
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 113 {
-			app.Stop()
-		} else if event.Rune() == 27 {
+
+		if event.Rune() == 27 {
 			form.Clear(true)
 			pages.SwitchToPage("Menu")
 			app.SetFocus(menu)
@@ -126,6 +125,7 @@ func mainMenu(i *Images) {
 
 }
 
+// removed s []string from this function
 func pushMenu(i *Images, s []string) {
 	i.server = "docker.io"
 
